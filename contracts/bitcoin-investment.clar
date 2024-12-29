@@ -72,3 +72,32 @@
         false
     )
 )
+
+;; Validation Helpers
+(define-private (validate-string-ascii (input (string-ascii 500)))
+    (and 
+        (not (is-eq input ""))
+        (<= (len input) u500)
+    )
+)
+
+(define-private (validate-principal (address principal))
+    (and
+        (not (is-eq address tx-sender))
+        (not (is-eq address (as-contract tx-sender)))
+    )
+)
+
+(define-private (get-proposal-status (proposal-id uint))
+    (match (map-get? proposals proposal-id)
+        proposal (get status proposal)
+        "NOT_FOUND"
+    )
+)
+
+(define-private (calculate-voting-power (address principal))
+    (match (map-get? members address)
+        member (get staked-amount member)
+        u0
+    )
+)
