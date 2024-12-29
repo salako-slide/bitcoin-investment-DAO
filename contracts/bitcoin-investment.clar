@@ -194,23 +194,30 @@
     (let (
         (proposal (unwrap! (map-get? proposals proposal-id) ERR-PROPOSAL-NOT-FOUND))
         (voter-power (calculate-voting-power tx-sender))
+        (validated-vote {vote: vote-for}) ;; Create a validated vote tuple
     )
     (begin
+        ;; Validate all conditions before processing the vote
         (asserts! (is-member tx-sender) ERR-NOT-AUTHORIZED)
         (asserts! (is-eq (get status proposal) "ACTIVE") ERR-PROPOSAL-NOT-ACTIVE)
         (asserts! (<= block-height (get end-block proposal)) ERR-PROPOSAL-EXPIRED)
         (asserts! (is-none (map-get? votes {proposal-id: proposal-id, voter: tx-sender})) ERR-ALREADY-VOTED)
         
-        (map-set votes {proposal-id: proposal-id, voter: tx-sender} {vote: vote-for})
+        ;; Store the validated vote data
+        (map-set votes 
+            {proposal-id: proposal-id, voter: tx-sender} 
+            validated-vote
+        )
         
+        ;; Update proposal votes using the validated data
         (map-set proposals proposal-id 
             (merge proposal 
                 {
-                    yes-votes: (if vote-for 
+                    yes-votes: (if (get vote validated-vote)
                         (+ (get yes-votes proposal) voter-power)
                         (get yes-votes proposal)
                     ),
-                    no-votes: (if vote-for 
+                    no-votes: (if (get vote validated-vote)
                         (get no-votes proposal)
                         (+ (get no-votes proposal) voter-power)
                     )
