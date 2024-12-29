@@ -60,3 +60,15 @@
     {proposal-id: uint, voter: principal} 
     {vote: bool}
 )
+
+;; Authorization Checks
+(define-private (is-dao-owner)
+    (is-eq tx-sender (var-get dao-owner))
+)
+
+(define-private (is-member (address principal))
+    (match (map-get? members address)
+        member (> (get staked-amount member) u0)
+        false
+    )
+)
