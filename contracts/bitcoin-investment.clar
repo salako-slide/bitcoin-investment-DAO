@@ -101,3 +101,36 @@
         u0
     )
 )
+
+;; Administrative Functions
+(define-public (initialize (new-owner principal))
+    (begin
+        (asserts! (is-dao-owner) ERR-NOT-AUTHORIZED)
+        (asserts! (validate-principal new-owner) ERR-INVALID-OWNER)
+        (var-set dao-owner new-owner)
+        (ok true)
+    )
+)
+
+;; Membership Management
+(define-public (stake-tokens (amount uint))
+    (begin
+        (asserts! (>= amount u0) ERR-INVALID-AMOUNT)
+        (try! (stx-transfer? amount tx-sender (as-contract tx-sender)))
+        
+        (let (
+            (current-balance (default-to 
+                {staked-amount: u0, last-reward-block: block-height, rewards-claimed: u0} 
+                (map-get? members tx-sender)))
+        )
+            (map-set members tx-sender {
+                staked-amount: (+ (get staked-amount current-balance) amount),
+                last-reward-block: block-height,
+                rewards-claimed: (get rewards-claimed current-balance)
+            })
+            
+            (var-set total-staked (+ (var-get total-staked) amount))
+            (ok true)
+        )
+    )
+)
