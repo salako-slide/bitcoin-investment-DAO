@@ -20,5 +20,3 @@
 (define-constant ERR-INVALID-TITLE (err u109))
 (define-constant ERR-INVALID-DESCRIPTION (err u110))
 (define-constant ERR-INVALID-RECIPIENT (err u111))
-
-Write a professional git commit for this and make it not long but standard
