@@ -134,3 +134,22 @@
         )
     )
 )
+
+(define-public (unstake-tokens (amount uint))
+    (let (
+        (current-balance (unwrap! (map-get? members tx-sender) ERR-NOT-AUTHORIZED))
+    )
+    (begin
+        (asserts! (>= (get staked-amount current-balance) amount) ERR-INSUFFICIENT-BALANCE)
+        (try! (as-contract (stx-transfer? amount (as-contract tx-sender) tx-sender)))
+        
+        (map-set members tx-sender {
+            staked-amount: (- (get staked-amount current-balance) amount),
+            last-reward-block: block-height,
+            rewards-claimed: (get rewards-claimed current-balance)
+        })
+        
+        (var-set total-staked (- (var-get total-staked) amount))
+        (ok true)
+    ))
+)
