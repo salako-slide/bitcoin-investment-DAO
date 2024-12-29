@@ -28,3 +28,35 @@
 (define-data-var quorum-threshold uint u500) ;; 50% in basis points
 (define-data-var proposal-duration uint u144) ;; ~24 hours in blocks
 (define-data-var min-proposal-amount uint u1000000) ;; Minimum STX required for proposal
+
+;; Data Structures
+(define-map members 
+    principal 
+    {
+        staked-amount: uint,
+        last-reward-block: uint,
+        rewards-claimed: uint
+    }
+)
+
+(define-map proposals 
+    uint 
+    {
+        proposer: principal,
+        title: (string-ascii 100),
+        description: (string-ascii 500),
+        amount: uint,
+        recipient: principal,
+        start-block: uint,
+        end-block: uint,
+        yes-votes: uint,
+        no-votes: uint,
+        status: (string-ascii 20),
+        executed: bool
+    }
+)
+
+(define-map votes 
+    {proposal-id: uint, voter: principal} 
+    {vote: bool}
+)
